@@ -61,7 +61,7 @@
 
 ```bash
 # Клонирование репозитория
-git clone <repository-url>
+git clone git@github.com:n-emelyanov/AP_PROJECT_3.git
 
 # Установка зависимостей через Poetry
 poetry install
