@@ -155,7 +155,7 @@ curl "http://localhost:8002/links/search?original_url=google"
 ![Скриншот](screens/screen.png)
 
 
-## Тесты
+# Тесты
 
 ## Запуск функциональных тестов
 ``` bash
