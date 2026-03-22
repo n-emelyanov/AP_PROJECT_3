@@ -2,7 +2,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 import os
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 # Читаем настройки из .env файла
 POSTGRES_USER = os.getenv("POSTGRES_USER", "postgres")

@@ -2,24 +2,34 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, status
 from api.database import engine, init_db 
 from api.routers import links
+import os
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """
     Контекст жизненного цикла для событий запуска/остановки приложения
     """
-
+    # Проверяем, запущены ли тесты
+    is_testing = os.getenv("TESTING", "false").lower() == "true"
+    
     print("Запуск приложения")
-
-    # Инициализируем базу данных (создаем таблицы если не существуют)
-    await init_db()
-    print("База данных инициализирована")
-
+    
+    # Инициализируем базу данных только если это не тесты
+    if not is_testing:
+        await init_db()
+        print("База данных инициализирована")
+    else:
+        print("Тестовый режим: инициализация БД пропущена")
+    
     yield  # Приложение работает здесь
-
+    
     # События при остановке приложения
-    await engine.dispose()
-    print("Соединение с базой данных закрыто")
+    if not is_testing:
+        await engine.dispose()
+        print("Соединение с базой данных закрыто")
+    
     print("Приложение остановлено")
 
 
@@ -109,3 +119,4 @@ async def health_check():
 
 # Регистрируем роутер для работы со ссылками
 app.include_router(links.router, prefix="/links")
+

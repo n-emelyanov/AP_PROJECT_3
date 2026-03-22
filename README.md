@@ -69,6 +69,9 @@ poetry install
 # Активация виртуального окружения
 source $(poetry env info --path)/bin/activate
 
+# Создание контейнера
+docker-compose up
+
 # Запуск приложения
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
@@ -150,3 +153,36 @@ curl "http://localhost:8002/links/search?original_url=google"
 ```
 
 ![Скриншот](screens/screen.png)
+
+
+## Тесты
+
+## Запуск функциональных тестов
+``` bash
+pytest tests/test_routers.py --cov=api --cov-report=html
+```
+
+## Открыть функциональные тесты в браузере
+```bash
+open htmlcov/index.html
+```
+
+
+## Запуск нагрузочных тестов
+``` bash
+# Запустите FastAPI сервер
+uvicorn main:app --reload --port 8000
+
+# Запустите Locust
+locust -f locustfile.py --host=http://localhost:8000
+```
+
+В браузере:
+- Откройте http://localhost:8089
+- Введите: Number of users: 10-50, Spawn rate: 2-5, Host: http://localhost:8000
+- Нажмите "Start swarming"
+
+## Результаты тестирования
+
+![Скриншот](screens/coverage.png)
+![Скриншот](screens/locust.png)

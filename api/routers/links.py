@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, or_, update
+from datetime import datetime, timezone
 from typing import Optional, List
 from datetime import datetime
 import secrets
@@ -19,7 +20,7 @@ def generate_short_code(length: int = 6) -> str:
 @router.post("/shorten", response_model=schemas.LinkResponse)
 async def create_short_link(
     link_data: schemas.LinkCreate,
-    db: AsyncSession = Depends(get_db)  # 👈 AsyncSession
+    db: AsyncSession = Depends(get_db)  # AsyncSession
 ):
     """Создание короткой ссылки"""
     # Проверяем custom_alias если указан
@@ -83,7 +84,7 @@ async def redirect_to_url(
             )
         ).values(
             clicks=models.Link.clicks + 1,
-            last_accessed_at=datetime.utcnow()
+            last_accessed_at=datetime.now(timezone.utc)
         )
         await db.execute(stmt)
         await db.commit()
@@ -107,7 +108,7 @@ async def redirect_to_url(
         )
     
     # Проверяем не истекла ли ссылка
-    if link.expires_at and link.expires_at < datetime.utcnow():
+    if link.expires_at and link.expires_at < datetime.now(timezone.utc):
         link.is_active = False
         await db.commit()
         raise HTTPException(
@@ -117,7 +118,7 @@ async def redirect_to_url(
     
     # Обновляем статистику
     link.clicks += 1
-    link.last_accessed_at = datetime.utcnow()
+    link.last_accessed_at = datetime.now(timezone.utc)
     await db.commit()
     
     # Кэшируем
@@ -231,7 +232,7 @@ async def cleanup_expired_links(
 ):
     """Удаление истекших ссылок"""
     query = select(models.Link).where(
-        models.Link.expires_at < datetime.utcnow(),
+        models.Link.expires_at < datetime.now(timezone.utc),
         models.Link.is_active == True
     )
     result = await db.execute(query)
